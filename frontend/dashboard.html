@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>VendorHub — Dashboard</title>
+  <link rel="stylesheet" href="/css/style.css" />
+</head>
+<body>
+
+<div id="toast" class="toast"></div>
+
+<!-- Sidebar Backdrop (mobile) -->
+<div id="sidebarBackdrop" class="overlay-backdrop"></div>
+
+<!-- APP LAYOUT -->
+<div class="app-layout">
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-logo">
+      <h2>Vendor<span>Hub</span></h2>
+    </div>
+    <nav class="sidebar-nav">
+      <div class="nav-item active" data-page="dashboard" onclick="showPage('dashboard')">
+        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1" stroke-width="2"/><rect x="14" y="3" width="7" height="7" rx="1" stroke-width="2"/><rect x="3" y="14" width="7" height="7" rx="1" stroke-width="2"/><rect x="14" y="14" width="7" height="7" rx="1" stroke-width="2"/></svg>
+        Dashboard
+      </div>
+      <div class="nav-item" data-page="vendors" onclick="showPage('vendors')">
+        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-width="2" d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4" stroke-width="2"/><path stroke-width="2" d="M23 21v-2a4 4 0 0 0-3-3.87"/><path stroke-width="2" d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+        Vendors
+      </div>
+      <div class="nav-item" data-page="inquiries" onclick="showPage('inquiries')">
+        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-width="2" d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8" stroke-width="2"/><line x1="16" y1="13" x2="8" y2="13" stroke-width="2"/><line x1="16" y1="17" x2="8" y2="17" stroke-width="2"/></svg>
+        Inquiries
+      </div>
+    </nav>
+    <div class="sidebar-footer">
+      <div class="user-info">
+        <div class="user-avatar" id="sidebarAvatar">U</div>
+        <div>
+          <div class="user-name" id="sidebarUserName">User</div>
+          <div class="user-email" id="sidebarUserEmail"></div>
+        </div>
+      </div>
+      <button class="btn-logout" id="logoutBtn">Logout</button>
+    </div>
+  </aside>
+
+  <!-- MAIN CONTENT -->
+  <div class="main-content">
+    <div class="topbar">
+      <div style="display:flex;align-items:center;gap:14px;">
+        <button class="hamburger" id="hamburger">
+          <span></span><span></span><span></span>
+        </button>
+        <h2 id="pageTitle">Dashboard</h2>
+      </div>
+      <div class="topbar-actions">
+        <span id="topbarDate" style="font-size:13px;color:var(--muted);"></span>
+      </div>
+    </div>
+
+    <!-- DASHBOARD PAGE -->
+    <div id="page-dashboard" class="page active">
+      <div class="page-content">
+        <div class="stats-grid">
+          <div class="stat-card accent">
+            <div class="label">Total Vendors</div>
+            <div class="value" id="statVendors">—</div>
+            <div class="sub">Registered vendors</div>
+          </div>
+          <div class="stat-card">
+            <div class="label">Total Inquiries</div>
+            <div class="value" id="statInquiries">—</div>
+            <div class="sub">All time</div>
+          </div>
+          <div class="stat-card warning">
+            <div class="label">Pending</div>
+            <div class="value" id="statPending">—</div>
+            <div class="sub">Awaiting review</div>
+          </div>
+          <div class="stat-card success">
+            <div class="label">Approved</div>
+            <div class="value" id="statApproved">—</div>
+            <div class="sub">Confirmed bookings</div>
+          </div>
+          <div class="stat-card danger">
+            <div class="label">Rejected</div>
+            <div class="value" id="statRejected">—</div>
+            <div class="sub">Declined inquiries</div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-header">
+            <h3>Recent Inquiries</h3>
+            <button class="btn btn-sm btn-outline" onclick="showPage('inquiries')">View All</button>
+          </div>
+          <div style="overflow-x:auto;">
+            <table>
+              <thead>
+                <tr><th>Event</th><th>Customer</th><th>Vendor</th><th>Date</th><th>Status</th></tr>
+              </thead>
+              <tbody id="recentInquiries">
+                <tr><td colspan="5" style="text-align:center;padding:24px;color:var(--muted);">Loading...</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- VENDORS PAGE -->
+    <div id="page-vendors" class="page">
+      <div class="page-content">
+        <div class="card">
+          <div class="card-header">
+            <h3>All Vendors</h3>
+            <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center;">
+              <div class="search-filter">
+                <div class="search-box">
+                  <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8" stroke-width="2"/><line x1="21" y1="21" x2="16.65" y2="16.65" stroke-width="2"/></svg>
+                  <input type="text" id="vendorSearch" placeholder="Search vendors..." oninput="loadVendors()" />
+                </div>
+                <select id="vendorCategoryFilter" class="filter-select" onchange="loadVendors()">
+                  <option value="">All Categories</option>
+                  <option>Catering</option>
+                  <option>Photography</option>
+                  <option>Decoration</option>
+                  <option>Music</option>
+                  <option>Venue</option>
+                  <option>Other</option>
+                </select>
+              </div>
+              <button class="btn btn-primary btn-sm" onclick="openAddVendor()">+ Add Vendor</button>
+            </div>
+          </div>
+          <div style="overflow-x:auto;">
+            <table>
+              <thead>
+                <tr><th>Name</th><th>Email</th><th>Phone</th><th>Category</th><th>Address</th><th>Actions</th></tr>
+              </thead>
+              <tbody id="vendorTableBody"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- INQUIRIES PAGE -->
+    <div id="page-inquiries" class="page">
+      <div class="page-content">
+        <div class="card">
+          <div class="card-header">
+            <h3>All Inquiries</h3>
+            <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center;">
+              <div class="search-filter">
+                <div class="search-box">
+                  <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8" stroke-width="2"/><line x1="21" y1="21" x2="16.65" y2="16.65" stroke-width="2"/></svg>
+                  <input type="text" id="inquirySearch" placeholder="Search by customer..." oninput="loadInquiries()" />
+                </div>
+                <select id="inquiryStatusFilter" class="filter-select" onchange="loadInquiries()">
+                  <option value="">All Status</option>
+                  <option>Pending</option>
+                  <option>Approved</option>
+                  <option>Rejected</option>
+                </select>
+              </div>
+              <button class="btn btn-primary btn-sm" onclick="openAddInquiry()">+ Add Inquiry</button>
+            </div>
+          </div>
+          <div style="overflow-x:auto;">
+            <table>
+              <thead>
+                <tr><th>Event</th><th>Customer</th><th>Vendor</th><th>Date</th><th>Budget</th><th>Status</th><th>Actions</th></tr>
+              </thead>
+              <tbody id="inquiryTableBody"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- end main-content -->
+</div><!-- end app-layout -->
+
+<!-- VENDOR MODAL -->
+<div id="vendorModal" class="modal-overlay">
+  <div class="modal">
+    <div class="modal-header">
+      <h3 id="vendorModalTitle">Add Vendor</h3>
+      <button class="modal-close" onclick="closeVendorModal()">×</button>
+    </div>
+    <form id="vendorForm">
+      <div class="modal-body">
+        <div class="form-group"><label>Name</label><input type="text" id="vName" required placeholder="Vendor name" /></div>
+        <div class="form-group"><label>Email</label><input type="email" id="vEmail" required placeholder="vendor@email.com" /></div>
+        <div class="form-group"><label>Phone</label><input type="tel" id="vPhone" required placeholder="+91 9876543210" /></div>
+        <div class="form-group">
+          <label>Category</label>
+          <select id="vCategory" required>
+            <option value="">Select category</option>
+            <option>Catering</option><option>Photography</option><option>Decoration</option>
+            <option>Music</option><option>Venue</option><option>Other</option>
+          </select>
+        </div>
+        <div class="form-group"><label>Address</label><textarea id="vAddress" rows="2" required placeholder="Vendor address"></textarea></div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-outline" onclick="closeVendorModal()">Cancel</button>
+        <button type="submit" class="btn btn-primary" style="width:auto;">Save Vendor</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- INQUIRY MODAL -->
+<div id="inquiryModal" class="modal-overlay">
+  <div class="modal">
+    <div class="modal-header">
+      <h3 id="inquiryModalTitle">Add Inquiry</h3>
+      <button class="modal-close" onclick="closeInquiryModal()">×</button>
+    </div>
+    <form id="inquiryForm">
+      <div class="modal-body">
+        <div class="form-group"><label>Event Name</label><input type="text" id="iEventName" required placeholder="Wedding, Birthday..." /></div>
+        <div class="form-group"><label>Customer Name</label><input type="text" id="iCustomerName" required placeholder="Customer full name" /></div>
+        <div class="form-group"><label>Event Date</label><input type="date" id="iEventDate" required /></div>
+        <div class="form-group"><label>Vendor</label><select id="iVendorId" required><option value="">Select Vendor</option></select></div>
+        <div class="form-group"><label>Budget (₹)</label><input type="number" id="iBudget" required placeholder="50000" min="0" /></div>
+        <div class="form-group">
+          <label>Status</label>
+          <select id="iStatus">
+            <option>Pending</option><option>Approved</option><option>Rejected</option>
+          </select>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-outline" onclick="closeInquiryModal()">Cancel</button>
+        <button type="submit" class="btn btn-primary" style="width:auto;">Save Inquiry</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script src="/js/api.js"></script>
+<script src="/js/dashboard.js"></script>
+<script src="/js/vendors.js"></script>
+<script src="/js/inquiries.js"></script>
+<script>
+  // Guard: if no token, redirect to login
+  if (!getToken()) window.location.href = '/login.html';
+
+  // Fill user info in sidebar
+  const user = getUser();
+  if (user) {
+    document.getElementById('sidebarUserName').textContent = user.name;
+    document.getElementById('sidebarUserEmail').textContent = user.email;
+    document.getElementById('sidebarAvatar').textContent = user.name.charAt(0).toUpperCase();
+  }
+
+  // Topbar date
+  document.getElementById('topbarDate').textContent = new Date().toLocaleDateString('en-IN', {
+    weekday: 'short', year: 'numeric', month: 'short', day: 'numeric'
+  });
+
+  // Page switching
+  function showPage(name) {
+    document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+    document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+    document.getElementById('page-' + name).classList.add('active');
+    document.querySelector('[data-page="' + name + '"]').classList.add('active');
+    const titles = { dashboard: 'Dashboard', vendors: 'Vendors', inquiries: 'Inquiries' };
+    document.getElementById('pageTitle').textContent = titles[name];
+    if (name === 'dashboard') loadDashboard();
+    if (name === 'vendors') loadVendors();
+    if (name === 'inquiries') loadInquiries();
+    if (window.innerWidth <= 768) {
+      document.getElementById('sidebar').classList.remove('open');
+      document.getElementById('sidebarBackdrop').classList.remove('open');
+    }
+  }
+
+  // Logout
+  document.getElementById('logoutBtn').addEventListener('click', () => {
+    clearAuth();
+    window.location.href = '/login.html';
+  });
+
+  // Hamburger
+  document.getElementById('hamburger').addEventListener('click', () => {
+    document.getElementById('sidebar').classList.toggle('open');
+    document.getElementById('sidebarBackdrop').classList.toggle('open');
+  });
+  document.getElementById('sidebarBackdrop').addEventListener('click', () => {
+    document.getElementById('sidebar').classList.remove('open');
+    document.getElementById('sidebarBackdrop').classList.remove('open');
+  });
+
+  // Load dashboard on start
+  loadDashboard();
+</script>
+</body>
+</html>

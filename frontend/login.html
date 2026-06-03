@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>VendorHub — Login</title>
+  <link rel="stylesheet" href="/css/style.css" />
+  <style>
+    body { min-height: 100vh; display: flex; align-items: center; justify-content: center; background: linear-gradient(135deg, #1a1714 0%, #2d2520 55%, #3d2e1e 100%); }
+  </style>
+</head>
+<body>
+
+<div id="toast" class="toast"></div>
+
+<div class="auth-box">
+  <div class="auth-logo">
+    <h1>Vendor<span>Hub</span></h1>
+    <p>Manage your event vendors with ease</p>
+  </div>
+  <div class="auth-tabs">
+    <div class="auth-tab active" data-tab="login">Login</div>
+    <div class="auth-tab" data-tab="register">Register</div>
+  </div>
+
+  <!-- LOGIN FORM -->
+  <form id="loginForm">
+    <div class="form-group">
+      <label>Email</label>
+      <input type="email" id="loginEmail" placeholder="you@example.com" required />
+    </div>
+    <div class="form-group">
+      <label>Password</label>
+      <input type="password" id="loginPassword" placeholder="••••••••" required />
+    </div>
+    <p id="loginError" class="error-msg"></p>
+    <button type="submit" class="btn btn-primary" style="margin-top:8px;">Login</button>
+  </form>
+
+  <!-- REGISTER FORM -->
+  <form id="registerForm" style="display:none;">
+    <div class="form-group">
+      <label>Full Name</label>
+      <input type="text" id="regName" placeholder="John Doe" required />
+    </div>
+    <div class="form-group">
+      <label>Email</label>
+      <input type="email" id="regEmail" placeholder="you@example.com" required />
+    </div>
+    <div class="form-group">
+      <label>Password</label>
+      <input type="password" id="regPassword" placeholder="Min 6 characters" required minlength="6" />
+    </div>
+    <p id="registerError" class="error-msg"></p>
+    <p id="registerSuccess" class="success-msg"></p>
+    <button type="submit" class="btn btn-primary" style="margin-top:8px;">Create Account</button>
+  </form>
+</div>
+
+<script src="/js/api.js"></script>
+<script>
+  // If already logged in, go straight to dashboard
+  if (getToken()) window.location.href = '/dashboard.html';
+
+  // Tab switching
+  document.querySelectorAll('.auth-tab').forEach(tab => {
+    tab.addEventListener('click', () => {
+      document.querySelectorAll('.auth-tab').forEach(t => t.classList.remove('active'));
+      tab.classList.add('active');
+      if (tab.dataset.tab === 'login') {
+        document.getElementById('loginForm').style.display = 'block';
+        document.getElementById('registerForm').style.display = 'none';
+      } else {
+        document.getElementById('loginForm').style.display = 'none';
+        document.getElementById('registerForm').style.display = 'block';
+      }
+    });
+  });
+
+  // Login
+  document.getElementById('loginForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const email = document.getElementById('loginEmail').value.trim();
+    const password = document.getElementById('loginPassword').value;
+    const errEl = document.getElementById('loginError');
+    errEl.textContent = '';
+    try {
+      const data = await apiFetch('/auth/login', { method: 'POST', body: JSON.stringify({ email, password }) });
+      setAuth(data.token, data.user);
+      window.location.href = '/dashboard.html';
+    } catch (err) {
+      errEl.textContent = err.message;
+    }
+  });
+
+  // Register
+  document.getElementById('registerForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const name = document.getElementById('regName').value.trim();
+    const email = document.getElementById('regEmail').value.trim();
+    const password = document.getElementById('regPassword').value;
+    const errEl = document.getElementById('registerError');
+    const sucEl = document.getElementById('registerSuccess');
+    errEl.textContent = ''; sucEl.textContent = '';
+    try {
+      await apiFetch('/auth/register', { method: 'POST', body: JSON.stringify({ name, email, password }) });
+      sucEl.textContent = 'Registered successfully! Please login.';
+      document.getElementById('registerForm').reset();
+      setTimeout(() => {
+        document.querySelector('[data-tab="login"]').click();
+      }, 1500);
+    } catch (err) {
+      errEl.textContent = err.message;
+    }
+  });
+</script>
+</body>
+</html>

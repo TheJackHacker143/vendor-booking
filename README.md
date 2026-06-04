@@ -189,8 +189,8 @@ Sequelize will automatically create all tables on first run. Register a new acco
 
 ## 👨‍💻 Author
 
-Built by **[Your Name]**  
-📧 your.email@example.com  
+Built by **[JAGANNATH PARIDA]**  
+📧 paridaj819@gmail.com  
 🔗 [LinkedIn](https://linkedin.com/in/yourprofile) | [GitHub](https://github.com/your-username)
 
 ---
